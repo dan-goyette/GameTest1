@@ -10,17 +10,12 @@ import SpriteKit
 
 class GameScene: SKScene {
     
-    var gridSquareName = "gridSquare"
-    var pieceName = "pieceSquare"
     var gameCircles = [SKShapeNode]()
     var mainSquare = SKSpriteNode()
     var rowCount = 5
     var columnCount = 6
     var gridSquareEdgeLength = 100
     
-    let boxCategory: UInt32 = 0x1 << 0
-    let circleCategory: UInt32 = 0x1 << 1
-
     
     override func didMoveToView(view: SKView) {
         createTileGrid()
@@ -55,7 +50,6 @@ class GameScene: SKScene {
                 disableNodePhysics(gridSquare)
 
                 
-                gridSquare.name = self.gridSquareName
                 
                 mainSquare.addChild(gridSquare)
                 
@@ -77,8 +71,12 @@ class GameScene: SKScene {
         addCircleAtCoordinates( 1, columnIndex: 4)
         
         
+        var gamePiece1 = GamePiece(pieceValue: 5)
+        self.addChild(gamePiece1)
+        putShapeAtCoordinates(gamePiece1, rowIndex: 4, columnIndex: 4, animate: false)
 
-        
+        // We need to add things that render as sprites, but have more logic. 
+        // This means subclasses of sprites.
       
     }
     
@@ -102,12 +100,25 @@ class GameScene: SKScene {
 
 
         gameCircles.append(circle)
+        
+//        
+//        let sparkEmmiter = SKEmitterNode(fileNamed: "MyParticle.sks")
+//        
+//        sparkEmmiter.name = "sparkEmmitter"
+//        sparkEmmiter.zPosition = 1
+//        sparkEmmiter.targetNode = self
+//        sparkEmmiter.particleLifetime = 1
+//        
+//        circle.addChild(sparkEmmiter)
+        
+        
+        
         self.addChild(circle)
         
-        putCircleAtCoordinates(circle, rowIndex: rowIndex,columnIndex:columnIndex, animate: false)
+        putShapeAtCoordinates(circle, rowIndex: rowIndex,columnIndex:columnIndex, animate: false)
 
     }
-    func putCircleAtCoordinates(circle: SKShapeNode, rowIndex: Int, columnIndex: Int, animate: Bool) {
+    func putShapeAtCoordinates(circle: SKShapeNode, rowIndex: Int, columnIndex: Int, animate: Bool) {
         
         if (rowIndex < 0 || rowIndex >= self.rowCount
             || columnIndex < 0 || columnIndex >= self.columnCount) {
@@ -179,7 +190,7 @@ class GameScene: SKScene {
             if (lastSelectedCircle != nil) {
                 var xPosition = Int(floor((location.x - mainSquare.position.x) / CGFloat(gridSquareEdgeLength)))
                 var yPosition = Int(floor((location.y - mainSquare.position.y) / CGFloat(gridSquareEdgeLength)))
-                putCircleAtCoordinates(lastSelectedCircle!, rowIndex: yPosition, columnIndex: xPosition, animate: true)
+                putShapeAtCoordinates(lastSelectedCircle!, rowIndex: yPosition, columnIndex: xPosition, animate: true)
                 lastSelectedCircle = nil;
                 selectedCircleInitialPosition = nil;
             }
@@ -188,38 +199,7 @@ class GameScene: SKScene {
         
         //self.revertLastSelectedNode();
     }
-    
-//    func doNodeColorChange(location: CGPoint) {
-//        // Find the node at the touch postion, if one exists.
-//        
-//        var currentNode = self.nodeAtPoint(location) as? SKSpriteNode
-//        
-//        if (currentNode != nil) {
-//            
-//            
-//            if (currentNode!.name != gridSquareName) {
-//                // If the current node isn't a gridSquareNode, then the only possible
-//                // thing to do is reset the node's color, as long as lastSelectedNode
-//                // isn't nil
-//                
-//                //revertLastSelectedNode()
-//            } else {
-//                // Either the lastSelectedNode is nil or it's set to something.
-//                // If it's nil, we don't worry about it,
-//                // If it's something, and different from the current node, we revert it.
-//                
-//                if (currentNode != lastSelectedNode) {
-//                    revertLastSelectedNode()
-//                    
-//                    self.lastSelectedNode = currentNode
-//                    self.lastSelectedColor = currentNode!.color
-//                    currentNode!.color = UIColor.purpleColor()
-//                    
-//                }
-//            }
-//        }
-//
-//    }
+  
     
     
     func revertLastSelectedNode() {
