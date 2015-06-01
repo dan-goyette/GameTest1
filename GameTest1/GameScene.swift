@@ -37,10 +37,7 @@ class GameScene: SKScene {
             y:CGRectGetMidY(self.frame) - CGFloat(mainSquareHeight / 2))
         mainSquare.color = UIColor.redColor()
         
-//        mainSquare.physicsBody?.dynamic = false
-//        mainSquare.physicsBody?.collisionBitMask = 0x0;
-//        mainSquare.physicsBody?.contactTestBitMask = 0x0;
-
+        disableNodePhysics(mainSquare)
 
         
         for rowIndex in 0 ..< rowCount {
@@ -55,9 +52,8 @@ class GameScene: SKScene {
                 gridSquare.anchorPoint = CGPointMake(0,0);
                 gridSquare.position = CGPoint(x: gridSquareEdgeLength * columnIndex, y: gridSquareEdgeLength * rowIndex);
 
-                gridSquare.physicsBody?.dynamic = false
-                gridSquare.physicsBody?.collisionBitMask = 0x0;
-                gridSquare.physicsBody?.contactTestBitMask = 0x0;
+                disableNodePhysics(gridSquare)
+
                 
                 gridSquare.name = self.gridSquareName
                 
@@ -86,6 +82,12 @@ class GameScene: SKScene {
       
     }
     
+    func disableNodePhysics(node: SKNode) {
+        node.physicsBody?.dynamic = false
+        node.physicsBody?.collisionBitMask = 0x0;
+        node.physicsBody?.contactTestBitMask = 0x0;
+    }
+    
     func addCircleAtCoordinates(rowIndex: Int, columnIndex: Int) {
    
         var radius = CGFloat(gridSquareEdgeLength / 4 )
@@ -95,21 +97,27 @@ class GameScene: SKScene {
         circle.glowWidth = 1.0
         circle.fillColor = SKColor.orangeColor()
         
-//        circle.physicsBody?.dynamic = false
-//        circle.physicsBody?.collisionBitMask = 0x0;
-//        circle.physicsBody?.contactTestBitMask = 0x0;
+      
+        disableNodePhysics(circle)
+
 
         gameCircles.append(circle)
         self.addChild(circle)
         
-        putCircleAtCoordinates(circle, rowIndex: rowIndex,columnIndex:columnIndex)
+        putCircleAtCoordinates(circle, rowIndex: rowIndex,columnIndex:columnIndex, animate: false)
 
     }
-    func putCircleAtCoordinates(circle: SKShapeNode, rowIndex: Int, columnIndex: Int) {
+    func putCircleAtCoordinates(circle: SKShapeNode, rowIndex: Int, columnIndex: Int, animate: Bool) {
         
         if (rowIndex < 0 || rowIndex >= self.rowCount
             || columnIndex < 0 || columnIndex >= self.columnCount) {
-                circle.position = self.selectedCircleInitialPosition!
+                
+                if (animate) {
+                    var moveToPoint = SKAction.moveTo(self.selectedCircleInitialPosition!, duration:0.3)
+                    circle.runAction(moveToPoint)
+                } else {
+                    circle.position = self.selectedCircleInitialPosition!
+                }
         } else {
             
             // position of the circle is the base position of the main square, plus the
@@ -118,7 +126,13 @@ class GameScene: SKScene {
             var xPosition = mainSquare.position.x + CGFloat(columnIndex * gridSquareEdgeLength) + CGFloat(gridSquareEdgeLength / 2)
             var yPosition = mainSquare.position.y + CGFloat(rowIndex * gridSquareEdgeLength) + CGFloat(gridSquareEdgeLength / 2)
 
-            circle.position = CGPointMake(xPosition,yPosition)
+            
+            if (animate) {
+                var moveToPoint = SKAction.moveTo(CGPointMake(xPosition,yPosition), duration:0.1)
+                circle.runAction(moveToPoint)
+            } else {
+                circle.position = CGPointMake(xPosition,yPosition)
+            }
         }
     }
     
@@ -165,7 +179,7 @@ class GameScene: SKScene {
             if (lastSelectedCircle != nil) {
                 var xPosition = Int(floor((location.x - mainSquare.position.x) / CGFloat(gridSquareEdgeLength)))
                 var yPosition = Int(floor((location.y - mainSquare.position.y) / CGFloat(gridSquareEdgeLength)))
-                putCircleAtCoordinates(lastSelectedCircle!, rowIndex: yPosition, columnIndex: xPosition)
+                putCircleAtCoordinates(lastSelectedCircle!, rowIndex: yPosition, columnIndex: xPosition, animate: true)
                 lastSelectedCircle = nil;
                 selectedCircleInitialPosition = nil;
             }
