@@ -17,6 +17,9 @@ class GameScene: SKScene {
     var rowCount = 5
     var columnCount = 6
     var gridSquareEdgeLength = 100
+    
+    let boxCategory: UInt32 = 0x1 << 0
+    let circleCategory: UInt32 = 0x1 << 1
 
     
     override func didMoveToView(view: SKView) {
@@ -34,9 +37,9 @@ class GameScene: SKScene {
             y:CGRectGetMidY(self.frame) - CGFloat(mainSquareHeight / 2))
         mainSquare.color = UIColor.redColor()
         
-        mainSquare.physicsBody?.dynamic = false
-        mainSquare.physicsBody?.collisionBitMask = 0x0;
-        mainSquare.physicsBody?.contactTestBitMask = 0x0;
+//        mainSquare.physicsBody?.dynamic = false
+//        mainSquare.physicsBody?.collisionBitMask = 0x0;
+//        mainSquare.physicsBody?.contactTestBitMask = 0x0;
 
 
         
@@ -92,9 +95,9 @@ class GameScene: SKScene {
         circle.glowWidth = 1.0
         circle.fillColor = SKColor.orangeColor()
         
-        circle.physicsBody?.dynamic = false
-        circle.physicsBody?.collisionBitMask = 0x0;
-        circle.physicsBody?.contactTestBitMask = 0x0;
+//        circle.physicsBody?.dynamic = false
+//        circle.physicsBody?.collisionBitMask = 0x0;
+//        circle.physicsBody?.contactTestBitMask = 0x0;
 
         gameCircles.append(circle)
         self.addChild(circle)
@@ -104,15 +107,19 @@ class GameScene: SKScene {
     }
     func putCircleAtCoordinates(circle: SKShapeNode, rowIndex: Int, columnIndex: Int) {
         
-        
-        // position of the circle is the base position of the main square, plus the
-        // row/column offsets, plus 1/4 the row/column offset to out the circle in the middle
-        // of the square.
-        var xPosition = mainSquare.position.x + CGFloat(columnIndex * gridSquareEdgeLength) + CGFloat(gridSquareEdgeLength / 2)
-        var yPosition = mainSquare.position.y + CGFloat(rowIndex * gridSquareEdgeLength) + CGFloat(gridSquareEdgeLength / 2)
+        if (rowIndex < 0 || rowIndex >= self.rowCount
+            || columnIndex < 0 || columnIndex >= self.columnCount) {
+                circle.position = self.selectedCircleInitialPosition!
+        } else {
+            
+            // position of the circle is the base position of the main square, plus the
+            // row/column offsets, plus 1/4 the row/column offset to out the circle in the middle
+            // of the square.
+            var xPosition = mainSquare.position.x + CGFloat(columnIndex * gridSquareEdgeLength) + CGFloat(gridSquareEdgeLength / 2)
+            var yPosition = mainSquare.position.y + CGFloat(rowIndex * gridSquareEdgeLength) + CGFloat(gridSquareEdgeLength / 2)
 
-        circle.position = CGPointMake(xPosition,yPosition)
-
+            circle.position = CGPointMake(xPosition,yPosition)
+        }
     }
     
     
@@ -131,6 +138,7 @@ class GameScene: SKScene {
     }
     
     var lastSelectedCircle : SKShapeNode? = nil;
+    var selectedCircleInitialPosition : CGPoint? = nil;
     override func touchesBegan(touches: Set<NSObject>, withEvent event: UIEvent) {
         for touch in (touches as! Set<UITouch>) {
             let location = touch.locationInNode(self)
@@ -140,10 +148,10 @@ class GameScene: SKScene {
                 if let shapeNode = node as? SKShapeNode {
                     if (contains (gameCircles, shapeNode)) {
                         lastSelectedCircle = shapeNode
+                        selectedCircleInitialPosition = lastSelectedCircle?.position
                     }
                 }
             }
-            //var currentNode = self.nodeAtPoint(location) as? SKSpriteNode
             
         }
     }
@@ -159,6 +167,7 @@ class GameScene: SKScene {
                 var yPosition = Int(floor((location.y - mainSquare.position.y) / CGFloat(gridSquareEdgeLength)))
                 putCircleAtCoordinates(lastSelectedCircle!, rowIndex: yPosition, columnIndex: xPosition)
                 lastSelectedCircle = nil;
+                selectedCircleInitialPosition = nil;
             }
         }
         
