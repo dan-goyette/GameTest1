@@ -32,44 +32,19 @@ class GameScene: SKScene {
             y:CGRectGetMidY(self.frame) - CGFloat(mainSquareHeight / 2))
         mainSquare.color = UIColor.redColor()
         
-        disableNodePhysics(mainSquare)
+        SpriteUtils.DisableNodePhysics(mainSquare)
 
         
         for rowIndex in 0 ..< rowCount {
             for columnIndex in 0 ..< columnCount {
-                let gridSquare = SKSpriteNode()
-                let colorKey = rowIndex % 2 + columnIndex % 2
-                
-                // Alternate every color, but switch the alternation for each row. (That is, a checkerboard.)
-                gridSquare.color = colorKey % 2 == 0 ? UIColor.blueColor() : UIColor.brownColor()
-                
-                gridSquare.size = CGSize(width: gridSquareEdgeLength, height: gridSquareEdgeLength)
-                gridSquare.anchorPoint = CGPointMake(0,0);
-                gridSquare.position = CGPoint(x: gridSquareEdgeLength * columnIndex, y: gridSquareEdgeLength * rowIndex);
-
-                disableNodePhysics(gridSquare)
-
-                
-                
+                let gridSquare = GridSquare(rowIndex: rowIndex, columnIndex: columnIndex)
                 mainSquare.addChild(gridSquare)
-                
-                
             }
         }
         
         self.addChild(mainSquare)
 
-//        for rowIndex in 0 ..< rowCount {
-//            for columnIndex in 0 ..< columnCount {
-//
-//        addCircleAtCoordinates( rowIndex, columnIndex: columnIndex)
-//            }
-//        }
 
-        addCircleAtCoordinates( 3, columnIndex: 2)
-        
-        addCircleAtCoordinates( 1, columnIndex: 4)
-        
         
         var gamePiece1 = GamePiece(pieceValue: 5)
         self.addChild(gamePiece1)
@@ -79,12 +54,7 @@ class GameScene: SKScene {
         // This means subclasses of sprites.
       
     }
-    
-    func disableNodePhysics(node: SKNode) {
-        node.physicsBody?.dynamic = false
-        node.physicsBody?.collisionBitMask = 0x0;
-        node.physicsBody?.contactTestBitMask = 0x0;
-    }
+ 
     
     func addCircleAtCoordinates(rowIndex: Int, columnIndex: Int) {
    
@@ -96,7 +66,7 @@ class GameScene: SKScene {
         circle.fillColor = SKColor.orangeColor()
         
       
-        disableNodePhysics(circle)
+        SpriteUtils.DisableNodePhysics(circle)
 
 
         gameCircles.append(circle)
@@ -118,7 +88,7 @@ class GameScene: SKScene {
         putShapeAtCoordinates(circle, rowIndex: rowIndex,columnIndex:columnIndex, animate: false)
 
     }
-    func putShapeAtCoordinates(circle: SKShapeNode, rowIndex: Int, columnIndex: Int, animate: Bool) {
+    func putShapeAtCoordinates(circle: SKNode, rowIndex: Int, columnIndex: Int, animate: Bool) {
         
         if (rowIndex < 0 || rowIndex >= self.rowCount
             || columnIndex < 0 || columnIndex >= self.columnCount) {
@@ -134,9 +104,8 @@ class GameScene: SKScene {
             // position of the circle is the base position of the main square, plus the
             // row/column offsets, plus 1/4 the row/column offset to out the circle in the middle
             // of the square.
-            var xPosition = mainSquare.position.x + CGFloat(columnIndex * gridSquareEdgeLength) + CGFloat(gridSquareEdgeLength / 2)
-            var yPosition = mainSquare.position.y + CGFloat(rowIndex * gridSquareEdgeLength) + CGFloat(gridSquareEdgeLength / 2)
-
+            var xPosition = mainSquare.position.x + CGFloat(columnIndex * gridSquareEdgeLength)
+            var yPosition = mainSquare.position.y + CGFloat(rowIndex * gridSquareEdgeLength)
             
             if (animate) {
                 var moveToPoint = SKAction.moveTo(CGPointMake(xPosition,yPosition), duration:0.1)
