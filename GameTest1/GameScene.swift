@@ -14,7 +14,6 @@ class GameScene: SKScene {
     var mainSquare = SKSpriteNode()
     var rowCount = 5
     var columnCount = 6
-    var gridSquareEdgeLength = 100
     
     
     override func didMoveToView(view: SKView) {
@@ -23,8 +22,8 @@ class GameScene: SKScene {
     
     func createTileGrid() {
         
-        var mainSquareWidth : Int = columnCount * gridSquareEdgeLength
-        var mainSquareHeight : Int = rowCount * gridSquareEdgeLength
+        var mainSquareWidth : Int = columnCount * AppConstants.UILayout.BoardSquareEdgeLength
+        var mainSquareHeight : Int = rowCount * AppConstants.UILayout.BoardSquareEdgeLength
         
         mainSquare.size = CGSize(width: mainSquareWidth , height: mainSquareHeight)
         mainSquare.anchorPoint = CGPointMake(0,0)
@@ -43,8 +42,6 @@ class GameScene: SKScene {
         }
         
         self.addChild(mainSquare)
-
-
         
         var gamePiece1 = GamePiece(pieceValue: 5)
         self.addChild(gamePiece1)
@@ -55,10 +52,11 @@ class GameScene: SKScene {
       
     }
  
+
     
     func addCircleAtCoordinates(rowIndex: Int, columnIndex: Int) {
    
-        var radius = CGFloat(gridSquareEdgeLength / 4 )
+        var radius = CGFloat(AppConstants.UILayout.BoardSquareEdgeLength / 4 )
         var circle = SKShapeNode(circleOfRadius: radius) // Size of Circle
         
         circle.strokeColor = SKColor.blackColor()
@@ -104,8 +102,8 @@ class GameScene: SKScene {
             // position of the circle is the base position of the main square, plus the
             // row/column offsets, plus 1/4 the row/column offset to out the circle in the middle
             // of the square.
-            var xPosition = mainSquare.position.x + CGFloat(columnIndex * gridSquareEdgeLength)
-            var yPosition = mainSquare.position.y + CGFloat(rowIndex * gridSquareEdgeLength)
+            var xPosition = mainSquare.position.x + CGFloat(columnIndex * AppConstants.UILayout.BoardSquareEdgeLength)
+            var yPosition = mainSquare.position.y + CGFloat(rowIndex * AppConstants.UILayout.BoardSquareEdgeLength)
             
             if (animate) {
                 var moveToPoint = SKAction.moveTo(CGPointMake(xPosition,yPosition), duration:0.1)
@@ -157,8 +155,8 @@ class GameScene: SKScene {
             let location = touch.locationInNode(self)
 
             if (lastSelectedCircle != nil) {
-                var xPosition = Int(floor((location.x - mainSquare.position.x) / CGFloat(gridSquareEdgeLength)))
-                var yPosition = Int(floor((location.y - mainSquare.position.y) / CGFloat(gridSquareEdgeLength)))
+                var xPosition = Int(floor((location.x - mainSquare.position.x) / CGFloat(AppConstants.UILayout.BoardSquareEdgeLength)))
+                var yPosition = Int(floor((location.y - mainSquare.position.y) / CGFloat(AppConstants.UILayout.BoardSquareEdgeLength)))
                 putShapeAtCoordinates(lastSelectedCircle!, rowIndex: yPosition, columnIndex: xPosition, animate: true)
                 lastSelectedCircle = nil;
                 selectedCircleInitialPosition = nil;
