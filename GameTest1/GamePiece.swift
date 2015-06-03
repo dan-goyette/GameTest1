@@ -16,14 +16,21 @@ public class GamePiece : SKSpriteNode
     
     override init(texture: SKTexture!, color: SKColor!, size: CGSize) {
         super.init(texture: texture, color: color, size: size)
+        SpriteUtils.DisableNodePhysics(self);
     }
     
     public convenience init(pieceValue: Int) {
-        var size = CGSizeMake(CGFloat(AppConstants.UILayout.BoardSquareEdgeLength), CGFloat(AppConstants.UILayout.BoardSquareEdgeLength))
+        var size = CGSizeMake(CGFloat(SpriteUtils.GetGamePieceWidth(pieceValue)), CGFloat(AppConstants.UILayout.GamePieceHeight))
                 
-        self.init(texture:nil, color: UIColor.greenColor(), size: size)
+        self.init(texture:nil, color: UIColor.grayColor(), size: size)
         
         self.PieceValue = pieceValue
+        self.anchorPoint = CGPointMake(0.5,0);
+        
+        var label = SKLabelNode(text: String(pieceValue))
+        label.fontSize = 18
+        label.fontColor = UIColor.blackColor()
+        self.addChild(label);
     }
     
     required public init?(coder aDecoder: NSCoder) {

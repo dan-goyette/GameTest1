@@ -12,6 +12,7 @@ class GameScene: SKScene {
     
     var gameCircles = [SKShapeNode]()
     var mainSquare = SKSpriteNode()
+    var GridSquares = [GridSquare]()
     var rowCount = 5
     var columnCount = 6
     
@@ -37,19 +38,59 @@ class GameScene: SKScene {
         for rowIndex in 0 ..< rowCount {
             for columnIndex in 0 ..< columnCount {
                 let gridSquare = GridSquare(rowIndex: rowIndex, columnIndex: columnIndex)
+                GridSquares.append(gridSquare);
                 mainSquare.addChild(gridSquare)
             }
         }
         
         self.addChild(mainSquare)
         
-        var gamePiece1 = GamePiece(pieceValue: 5)
-        self.addChild(gamePiece1)
-        putShapeAtCoordinates(gamePiece1, rowIndex: 4, columnIndex: 4, animate: false)
+//        var gamePiece1 = GamePiece(pieceValue: 5)
+//        self.addChild(gamePiece1)
+//        putShapeAtCoordinates(gamePiece1, rowIndex: 4, columnIndex: 4, animate: false)
 
+        
+        // Add a few game pieces to one of the grid squares.
+        var gamePiece5_1 = GamePiece(pieceValue: 5)
+        var gamePiece4_1 = GamePiece(pieceValue: 4)
+        var gamePiece3_1 = GamePiece(pieceValue: 3)
+        var gamePiece2_1 = GamePiece(pieceValue: 2)
+        var gamePiece1_1 = GamePiece(pieceValue: 1)
+        
+        var gridSquare_2_2 = getGridSquareAtRowAndColumnIndex(2, columnIndex: 2)!
+        gridSquare_2_2.tryAddGamePiece(gamePiece5_1);
+        gridSquare_2_2.tryAddGamePiece(gamePiece4_1);
+        gridSquare_2_2.tryAddGamePiece(gamePiece3_1);
+        gridSquare_2_2.tryAddGamePiece(gamePiece2_1);
+        gridSquare_2_2.tryAddGamePiece(gamePiece1_1);
+        
+        
+        
+        var gamePiece5_2 = GamePiece(pieceValue: 5)
+        var gamePiece2_2 = GamePiece(pieceValue: 2)
+        var gamePiece1_2 = GamePiece(pieceValue: 1)
+        
+        var gridSquare_3_1 = getGridSquareAtRowAndColumnIndex(3, columnIndex: 1)!
+        gridSquare_3_1.tryAddGamePiece(gamePiece5_2);
+        gridSquare_3_1.tryAddGamePiece(gamePiece2_2);
+        gridSquare_3_1.tryAddGamePiece(gamePiece1_2);
+
+
+        
         // We need to add things that render as sprites, but have more logic. 
         // This means subclasses of sprites.
       
+    }
+    
+    
+    func getGridSquareAtRowAndColumnIndex(rowIndex: Int, columnIndex: Int) -> GridSquare? {
+        for gridSquare in self.GridSquares {
+            if (gridSquare.RowIndex == rowIndex && gridSquare.ColumnIndex == columnIndex) {
+                return gridSquare;
+            }
+        }
+        
+        return nil;
     }
  
 

@@ -11,34 +11,33 @@ import SpriteKit
 
 public class DragStack : SKSpriteNode
 {
+    private var GamePieces : [GamePiece]!
+
+    override init(texture: SKTexture!, color: SKColor!, size: CGSize) {
+        super.init(texture: texture, color: color, size: size)
+        SpriteUtils.DisableNodePhysics(self);
+    }
     
-    init() {
-        self.gamePieces = [GamePiece]()
-        
+    public convenience init(gamePieces : [GamePiece]) {
         var size = CGSizeMake(CGFloat(AppConstants.UILayout.BoardSquareEdgeLength), CGFloat(AppConstants.UILayout.BoardSquareEdgeLength))
         
-        // Call the default initializer
-        super.init(texture: nil, color: UIColor.clearColor(), size: size)
+        self.init(texture:nil, color: UIColor.clearColor(), size: size)
         
-        self.size = size
+        self.GamePieces = [GamePiece]()
+        self.refreshGamePiecePositions();
     }
-    
     
     required public init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-    
-    public func addGamePiece(gamePiece: GamePiece)
-    {
-        gamePieces.append(gamePiece)
-        
-        self.addChild(gamePiece)
-        gamePiece.position = CGPointMake(self.position.x, self.position.y + CGFloat(15 * gamePieces.count))
+        super.init(coder: aDecoder)
     }
     
     public func getGamePieces() -> [GamePiece] {
-        return gamePieces
+        return GamePieces;
     }
     
-    private var gamePieces : [GamePiece]}
+    private func refreshGamePiecePositions() {
+        //GamePieces.position = CGPointMake(self.position.x, self.position.y + CGFloat(15 * gamePieces.count))
+        // TODO
+    }
+}
 

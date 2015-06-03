@@ -75,7 +75,7 @@ class GridSquareTests: XCTestCase {
         XCTAssertFalse(gridSquare.tryAddGamePiece(gamePiece_v5_1))
         XCTAssertTrue(gridSquare.tryAddGamePiece(gamePiece_v3_1))
 
-        
+
     }
     
     

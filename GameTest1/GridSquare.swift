@@ -20,6 +20,7 @@
             
         override init(texture: SKTexture!, color: SKColor!, size: CGSize) {
             super.init(texture: texture, color: color, size: size)
+            SpriteUtils.DisableNodePhysics(self);
         }
         
         public convenience init(rowIndex: Int, columnIndex: Int) {
@@ -46,16 +47,7 @@
         required public init?(coder aDecoder: NSCoder) {
             super.init(coder: aDecoder)
         }
-
         
-        
-        private func addGamePiece(gamePiece: GamePiece) {
-            assert(canAddGamePiece(gamePiece), "Game piece may not be added.")
-            
-            self.GamePieces.append(gamePiece);
-            
-            // TODO: Visualization
-        }
         
         public func canAddGamePiece(gamePiece: GamePiece) -> Bool {
             // The piece can be added as long as either the square either has no pieces in it
@@ -69,7 +61,12 @@
             if (!canAddGamePiece(gamePiece)) {
                 return false;
             } else {
-                self.addGamePiece(gamePiece);
+                self.GamePieces.append(gamePiece);
+                // TODO: Visualization
+                
+                self.addChild(gamePiece)
+                
+                refreshGamePiecePositions();
                 return true;
             }
         }
@@ -96,8 +93,58 @@
                 return false;
             } else {
                 self.GamePieces.removeAtIndex(find(self.GamePieces, gamePiece)!);
+                // TODO: Visualization
+                
+                gamePiece.removeFromParent()
+
+                self.refreshGamePiecePositions()
                 return true;            
             }
+        }
+        
+        private func refreshGamePiecePositions() {
+            for tuple in SpriteUtils.GetGamePiecePositions(self.GamePieces) {
+                tuple.gamePiece.position = tuple.position
+            }
+        }
+        
+        
+        public func getDragStack() -> DragStack? {
+            if (self.GamePieces.count ==  0) {
+                return nil;
+            }
+            
+            
+            // The drag stack contains the top item in the stack, as well as all other
+            // consecutive items. They need to be removed from the GamePieces list.
+            
+            // Get the consecutive items starting from the top of the stack.
+            var topOfStack = [GamePiece]()
+            var firstPiece = self.GamePieces[self.GamePieces.count - 1];
+            topOfStack.append(firstPiece);
+            var lastPieceValue = firstPiece.PieceValue;
+            
+            for (var index = self.GamePieces.count - 2; index >= 0; index--) {
+                var gamePiece = self.GamePieces[index]
+                if (gamePiece.PieceValue - 1 == lastPieceValue) {
+                    // This is a consecutive piece. Add it.
+                    topOfStack.insert(gamePiece, atIndex: 0);
+                    lastPieceValue = gamePiece.PieceValue;
+                } else {
+                    // Not consecutive. Break out of the loop.
+                    break;
+                }
+            }
+            
+            var dragStack = DragStack(gamePieces: topOfStack);
+            
+            // Remove all of the dragged items from the GridSquare.
+            for gamePiece in topOfStack {
+                self.tryRemoveGamePiece(gamePiece)
+            }
+            
+            return dragStack;
+            
         }
         
     }
