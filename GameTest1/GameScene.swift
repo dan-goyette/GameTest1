@@ -16,6 +16,7 @@ class GameScene: SKScene {
     
     var inventoryBoundsSquare = SKSpriteNode()
     var InventorySquares = [GridSquare]()
+    var InventoryCounter : Int = 0
     
     var rowCount = 5
     var columnCount = 6
@@ -119,19 +120,44 @@ class GameScene: SKScene {
         inventoryBoundsSquare.anchorPoint = CGPointMake(0,0)
         inventoryBoundsSquare.position = CGPoint(x:CGRectGetMidX(self.frame) - CGFloat(inventorySquareWidth / 2),
             y:CGRectGetMaxY(self.frame) - CGFloat(inventorySquareHeight))
-        inventoryBoundsSquare.color = UIColor.redColor()
+        inventoryBoundsSquare.color = UIColor.grayColor()
         
         SpriteUtils.DisableNodePhysics(inventoryBoundsSquare)
         
         
-            for columnIndex in 0 ..< columnCount {
-                let inventorySquare = GridSquare(rowIndex: 0, columnIndex: columnIndex, isInventorySquare: true)
-                InventorySquares.append(inventorySquare);
-                inventoryBoundsSquare.addChild(inventorySquare		)
-            }
+//            for columnIndex in 0 ..< columnCount {
+//                let inventorySquare = GridSquare(rowIndex: 0, columnIndex: columnIndex, isInventorySquare: true)
+//                InventorySquares.append(inventorySquare);
+//                inventoryBoundsSquare.addChild(inventorySquare		)
+//            }
         
         
         self.addChild(inventoryBoundsSquare)
+        
+        
+        var wait = SKAction.waitForDuration(2.5)
+        var run = SKAction.runBlock({
+            var newInventorySquare = GridSquare(rowIndex: 0, columnIndex: 0, isInventorySquare: true)
+            self.InventorySquares.append(newInventorySquare)
+            var pieceValue = Int(arc4random_uniform(5) + 1)
+            newInventorySquare.tryAddGamePiece( GamePiece(pieceValue: pieceValue))
+            newInventorySquare.position.x += 500
+            newInventorySquare.color = UIColor.orangeColor()
+            
+            var moveLeft = SKAction.moveByX(-500, y: 0, duration: 9.0)
+            var removeFromGame = SKAction.runBlock({
+                newInventorySquare.removeFromParent()
+                self.InventorySquares.removeAtIndex(find(self.InventorySquares, newInventorySquare)!)
+            })
+            
+            self.inventoryBoundsSquare.addChild(newInventorySquare)
+            
+            var seq = SKAction.sequence([moveLeft, removeFromGame])
+            newInventorySquare.runAction(seq)
+        });
+        
+        var sequence = SKAction.sequence([run,wait])
+        self.runAction(SKAction.repeatActionForever(sequence))
     }
     
 
@@ -374,14 +400,14 @@ class GameScene: SKScene {
         }
         
         // Add another piece, if possible.
-        for columnIndex in 0..<columnCount {
-            var inventorySquare = self.InventorySquares[columnIndex]
-            if (inventorySquare.getGamePieces().count == 0) {
-                var pieceValue = Int(arc4random_uniform(5) + 1)
-                inventorySquare.tryAddGamePiece( GamePiece(pieceValue: pieceValue))
-                break
-            }
-        }
+//        for columnIndex in 0..<columnCount {
+//            var inventorySquare = self.InventorySquares[columnIndex]
+//            if (inventorySquare.getGamePieces().count == 0) {
+//                var pieceValue = Int(arc4random_uniform(5) + 1)
+//                inventorySquare.tryAddGamePiece( GamePiece(pieceValue: pieceValue))
+//                break
+//            }
+//        }
     }
   
     func addToScore(points: Int) {
@@ -415,5 +441,8 @@ class GameScene: SKScene {
     
     override func update(currentTime: CFTimeInterval) {
         /* Called before each frame is rendered */
+        
+        
+        // Every 3 seconds add a new GridSquare with a game piece in it
     }
 }
