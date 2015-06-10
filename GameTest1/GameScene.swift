@@ -13,12 +13,34 @@ class GameScene: SKScene {
     var gameCircles = [SKShapeNode]()
     var mainSquare = SKSpriteNode()
     var GridSquares = [GridSquare]()
+    
+    var inventoryBoundsSquare = SKSpriteNode()
+    var InventorySquares = [GridSquare]()
+    
     var rowCount = 5
     var columnCount = 6
+    
+    var score = 0
+    var scoreLabel = SKLabelNode(text: "")
     
     
     override func didMoveToView(view: SKView) {
         createTileGrid()
+        createInventoryGrid()
+        addScoreLabel()
+    }
+    
+    func addScoreLabel() {
+        var staticScoreLabel = SKLabelNode(text: "Score:")
+        staticScoreLabel.position = CGPointMake(50, CGRectGetMaxY(self.frame) - CGFloat(50))
+        self.addChild(staticScoreLabel)
+        
+        scoreLabel.position = CGPointMake(125, CGRectGetMaxY(self.frame) - CGFloat(50))
+        self.addChild(scoreLabel)
+        
+        addToScore(0)
+        
+        self.userInteractionEnabled = true
     }
     
     func createTileGrid() {
@@ -37,7 +59,7 @@ class GameScene: SKScene {
         
         for rowIndex in 0 ..< rowCount {
             for columnIndex in 0 ..< columnCount {
-                let gridSquare = GridSquare(rowIndex: rowIndex, columnIndex: columnIndex)
+                let gridSquare = GridSquare(rowIndex: rowIndex, columnIndex: columnIndex, isInventorySquare: false)
                 GridSquares.append(gridSquare);
                 mainSquare.addChild(gridSquare)
             }
@@ -45,10 +67,6 @@ class GameScene: SKScene {
         
         self.addChild(mainSquare)
         
-//        var gamePiece1 = GamePiece(pieceValue: 5)
-//        self.addChild(gamePiece1)
-//        putShapeAtCoordinates(gamePiece1, rowIndex: 4, columnIndex: 4, animate: false)
-
         
         // Add a few game pieces to one of the grid squares.
         var gamePiece5_1 = GamePiece(pieceValue: 5)
@@ -58,7 +76,7 @@ class GameScene: SKScene {
         var gamePiece1_1 = GamePiece(pieceValue: 1)
         
         var gridSquare_2_2 = getGridSquareAtRowAndColumnIndex(2, columnIndex: 2)!
-        gridSquare_2_2.tryAddGamePiece(gamePiece5_1);
+        //gridSquare_2_2.tryAddGamePiece(gamePiece5_1);
         gridSquare_2_2.tryAddGamePiece(gamePiece4_1);
         gridSquare_2_2.tryAddGamePiece(gamePiece3_1);
         gridSquare_2_2.tryAddGamePiece(gamePiece2_1);
@@ -75,12 +93,48 @@ class GameScene: SKScene {
         gridSquare_3_1.tryAddGamePiece(gamePiece2_2);
         gridSquare_3_1.tryAddGamePiece(gamePiece1_2);
 
-
+        var gridSquare_4_1 = getGridSquareAtRowAndColumnIndex(4, columnIndex: 1)!
+        gridSquare_4_1.tryAddGamePiece(GamePiece(pieceValue: 4))
+        gridSquare_4_1.tryAddGamePiece(GamePiece(pieceValue: 2))
         
-        // We need to add things that render as sprites, but have more logic. 
-        // This means subclasses of sprites.
+        
+        var gridSquare_2_5 = getGridSquareAtRowAndColumnIndex(2, columnIndex: 5)!
+        gridSquare_2_5.tryAddGamePiece(GamePiece(pieceValue: 5))
+        gridSquare_2_5.tryAddGamePiece(GamePiece(pieceValue: 4))
+        gridSquare_2_5.tryAddGamePiece(GamePiece(pieceValue: 3))
+        gridSquare_2_5.tryAddGamePiece(GamePiece(pieceValue: 1))
+        
+        
+        
       
     }
+    
+    
+    func createInventoryGrid() {
+        
+        var inventorySquareWidth : Int = columnCount * AppConstants.UILayout.BoardSquareEdgeLength
+        var inventorySquareHeight : Int = 1 * AppConstants.UILayout.BoardSquareEdgeLength
+        
+        inventoryBoundsSquare.size = CGSize(width: inventorySquareWidth , height: inventorySquareHeight)
+        inventoryBoundsSquare.anchorPoint = CGPointMake(0,0)
+        inventoryBoundsSquare.position = CGPoint(x:CGRectGetMidX(self.frame) - CGFloat(inventorySquareWidth / 2),
+            y:CGRectGetMaxY(self.frame) - CGFloat(inventorySquareHeight))
+        inventoryBoundsSquare.color = UIColor.redColor()
+        
+        SpriteUtils.DisableNodePhysics(inventoryBoundsSquare)
+        
+        
+            for columnIndex in 0 ..< columnCount {
+                let inventorySquare = GridSquare(rowIndex: 0, columnIndex: columnIndex, isInventorySquare: true)
+                InventorySquares.append(inventorySquare);
+                inventoryBoundsSquare.addChild(inventorySquare		)
+            }
+        
+        
+        self.addChild(inventoryBoundsSquare)
+    }
+    
+
     
     
     func getGridSquareAtRowAndColumnIndex(rowIndex: Int, columnIndex: Int) -> GridSquare? {
@@ -164,28 +218,58 @@ class GameScene: SKScene {
             let location = touch.locationInNode(self)
             //self.doNodeColorChange(location)
             
-            if (lastSelectedCircle != nil) {
-                lastSelectedCircle?.position = location
+            if (lastSelectedDragStack != nil) {
+                var newX = location.x - CGFloat((AppConstants.UILayout.BoardSquareEdgeLength / 2))
+                var newY = location.y //- CGFloat((AppConstants.UILayout.BoardSquareEdgeLength / 4))
+                lastSelectedDragStack!.position = CGPointMake(newX, newY)
             }
+            break
         }
     }
     
     var lastSelectedCircle : SKShapeNode? = nil;
     var selectedCircleInitialPosition : CGPoint? = nil;
+    var lastSelectedGridSquare : GridSquare? = nil;
+    var lastSelectedDragStack : DragStack? = nil;
     override func touchesBegan(touches: Set<NSObject>, withEvent event: UIEvent) {
         for touch in (touches as! Set<UITouch>) {
             let location = touch.locationInNode(self)
-            //self.doNodeColorChange(location)
             
             for node in self.nodesAtPoint(location) {
-                if let shapeNode = node as? SKShapeNode {
-                    if (contains (gameCircles, shapeNode)) {
-                        lastSelectedCircle = shapeNode
-                        selectedCircleInitialPosition = lastSelectedCircle?.position
+                if let gridSquare = node as? GridSquare {
+                    if (gridSquare.getGamePieces().count > 0) {
+                        lastSelectedGridSquare = gridSquare;
+                        var dragStack = gridSquare.getDragStack()!;
+                        lastSelectedDragStack = dragStack;
+
+                        var newX = location.x - CGFloat((AppConstants.UILayout.BoardSquareEdgeLength / 2))
+                        var newY = location.y //- CGFloat((AppConstants.UILayout.BoardSquareEdgeLength / 4))
+                        
+
+                        dragStack.position = CGPointMake(newX, newY)
+                        self.addChild(dragStack);
+                        
+                        var startDragNoise = SKAction.playSoundFileNamed("Item1A.wav", waitForCompletion: false)
+                        self.runAction(startDragNoise)
+                        
+                        
+//                        
+//                        var newX1 = mainSquare.position.x + location.x - CGFloat((AppConstants.UILayout.BoardSquareEdgeLength / 2))
+//                        var newY1 = mainSquare.position.y + location.y //- CGFloat((AppConstants.UILayout.BoardSquareEdgeLength / 4))
+//                        var newStartPoint = CGPointMake(newX1, newY1)
+//                        = newStartPoint
+//                        
+//                                                var moveToPoint = SKAction.moveTo(CGPointMake(newX, newY), duration:0.2)
+//
+                        
+                     
+                       // dragStack.runAction(moveToPoint)
+
                     }
                 }
             }
             
+            break
         }
     }
     
@@ -195,20 +279,100 @@ class GameScene: SKScene {
         for touch in (touches as! Set<UITouch>) {
             let location = touch.locationInNode(self)
 
-            if (lastSelectedCircle != nil) {
-                var xPosition = Int(floor((location.x - mainSquare.position.x) / CGFloat(AppConstants.UILayout.BoardSquareEdgeLength)))
-                var yPosition = Int(floor((location.y - mainSquare.position.y) / CGFloat(AppConstants.UILayout.BoardSquareEdgeLength)))
-                putShapeAtCoordinates(lastSelectedCircle!, rowIndex: yPosition, columnIndex: xPosition, animate: true)
-                lastSelectedCircle = nil;
-                selectedCircleInitialPosition = nil;
+            var targetGridSquare : GridSquare? = nil;
+            
+            // Try to drop the drag stack on the current square. Do this by determining if we're
+            // over a grid square, and whether the square will accept the stack.
+            if (lastSelectedDragStack != nil) {
+                for node in self.nodesAtPoint(location) {
+                    if (node is GridSquare) {
+                        var gridSquare = node as! GridSquare;
+                        if (!gridSquare.IsInventorySquare) {
+                            if (gridSquare.canAddDragStack(lastSelectedDragStack!)) {
+                                targetGridSquare = gridSquare
+                            }
+                        }
+                    }
+                }
+                
+            }
+            
+            // If we a dropping on a valid square, complete the operation. Else, return the stack to where it started.
+            if (targetGridSquare != nil) {
+                targetGridSquare!.tryAddDragStack(lastSelectedDragStack!)
+                
+                
+                if (targetGridSquare!.getGamePieces().count  == 5) {
+                    // We've made a stack of 5. Score a point.
+                    targetGridSquare!.getDragStack()
+                    
+                    self.addToScore(1)
+                    var startDragNoise = SKAction.playSoundFileNamed("Menu1A.wav", waitForCompletion: false)
+                    self.runAction(startDragNoise)
+
+                } else {
+//                    var startDragNoise = SKAction.playSoundFileNamed("Item1B.wav", waitForCompletion: false)
+//                    self.runAction(startDragNoise)
+
+                }
+            } else if (lastSelectedGridSquare != nil) 		{
+                lastSelectedGridSquare!.tryAddDragStack(lastSelectedDragStack!)
+            }
+            
+            break
+        }
+        
+        lastSelectedGridSquare = nil;
+        lastSelectedDragStack = nil;
+
+
+        // Clean up inventory.
+        
+        for columnIndex in 0..<columnCount {
+            var inventorySquare = self.InventorySquares[columnIndex]
+            if (inventorySquare.getGamePieces().count == 0) {
+                // Look ahead for the next square with pieces.
+                for altColumnIndex in (columnIndex + 1)..<columnCount {
+                    var altInventorySquare = self.InventorySquares[altColumnIndex]
+                    if (altInventorySquare.getGamePieces().count > 0) {
+                        inventorySquare.tryAddDragStack(altInventorySquare.getDragStack()!)
+                        break
+                    }
+                }
             }
         }
         
-        
-        //self.revertLastSelectedNode();
+        // Add another piece, if possible.
+        for columnIndex in 0..<columnCount {
+            var inventorySquare = self.InventorySquares[columnIndex]
+            if (inventorySquare.getGamePieces().count == 0) {
+                var pieceValue = Int(arc4random_uniform(5) + 1)
+                inventorySquare.tryAddGamePiece( GamePiece(pieceValue: pieceValue))
+                break
+            }
+        }
     }
   
-    
+    func addToScore(points: Int) {
+        
+        self.score += points
+        scoreLabel.text = String(self.score)
+        
+        if (points > 0) {
+            
+            var grow = SKAction.scaleTo( 2.0, duration: 0.2)
+
+            var group1 = SKAction.group([grow])
+            
+            var shrink = SKAction.scaleTo (1.0, duration: 0.5)
+
+            var group2 = SKAction.group([shrink])
+            
+            var actions = SKAction.sequence([group1, group2])
+            scoreLabel.runAction(actions)
+        }
+
+    }
     
     func revertLastSelectedNode() {
         if (self.lastSelectedNode != nil) {

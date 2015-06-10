@@ -14,8 +14,11 @@
     {
         public var RowIndex : Int!
         public var ColumnIndex : Int!
+        public var IsInventorySquare : Bool!;
         
         private var GamePieces : [GamePiece]!
+        
+
         
             
         override init(texture: SKTexture!, color: SKColor!, size: CGSize) {
@@ -23,19 +26,21 @@
             SpriteUtils.DisableNodePhysics(self);
         }
         
-        public convenience init(rowIndex: Int, columnIndex: Int) {
+        public convenience init(rowIndex: Int, columnIndex: Int, isInventorySquare: Bool) {
             var size = CGSizeMake(CGFloat(AppConstants.UILayout.BoardSquareEdgeLength), CGFloat(AppConstants.UILayout.BoardSquareEdgeLength))
             
             self.init(texture:nil, color: UIColor.greenColor(), size: size)
             
             self.RowIndex = rowIndex
             self.ColumnIndex = columnIndex
+            self.IsInventorySquare = isInventorySquare;
             self.GamePieces = [GamePiece]()
             
             let colorKey = RowIndex % 2 + ColumnIndex % 2
             
             // Alternate every color, but switch the alternation for each row. (That is, a checkerboard.)
-            self.color = colorKey % 2 == 0 ? UIColor.blueColor() : UIColor.brownColor()
+            self.color = self.IsInventorySquare! ? (colorKey % 2 == 0 ? UIColor.darkGrayColor() : UIColor.grayColor())
+                : (colorKey % 2 == 0 ? UIColor.blueColor() : UIColor.brownColor())
             self.size = size
             self.anchorPoint = CGPointMake(0,0);
             self.position = CGPoint(x: (AppConstants.UILayout.BoardSquareEdgeLength) * columnIndex, y: (AppConstants.UILayout.BoardSquareEdgeLength) * rowIndex);
@@ -93,8 +98,7 @@
                 return false;
             } else {
                 self.GamePieces.removeAtIndex(find(self.GamePieces, gamePiece)!);
-                // TODO: Visualization
-                
+                                
                 gamePiece.removeFromParent()
 
                 self.refreshGamePiecePositions()
@@ -136,15 +140,40 @@
                 }
             }
             
-            var dragStack = DragStack(gamePieces: topOfStack);
-            
             // Remove all of the dragged items from the GridSquare.
-            for gamePiece in topOfStack {
-                self.tryRemoveGamePiece(gamePiece)
+            for gamePiece in topOfStack.reverse() {
+                assert(self.tryRemoveGamePiece(gamePiece))
             }
             
-            return dragStack;
+            var dragStack = DragStack(gamePieces: topOfStack);
             
+            
+            return dragStack;            
+        }
+        
+        public func canAddDragStack(dragStack: DragStack) -> Bool {
+            // if drag stack's max pieceValue is greater than this square's min piece value,
+            // allow the stack.
+            var dragStackMaxPieceValue = sorted(dragStack.getGamePieces(), {p1, p2 in return p1.PieceValue > p2.PieceValue}).first?.PieceValue
+            var gridSquareMinPieceValue = sorted(self.getGamePieces(), {p1, p2 in return p1.PieceValue < p2.PieceValue}).first?.PieceValue ?? Int.max
+            
+            return dragStackMaxPieceValue < gridSquareMinPieceValue
+        }
+        
+        public func tryAddDragStack(dragStack: DragStack) -> Bool {
+            if (!canAddDragStack(dragStack)) {
+                return false;
+            }
+            
+            // Take all the pieces out of the stack and place them into the gridSquare. 
+            for gamePiece in sorted(dragStack.getGamePieces(), {p1, p2 in return p1.PieceValue > p2.PieceValue}) {
+                gamePiece.removeFromParent()
+                self.tryAddGamePiece(gamePiece)
+                
+                // No need to remove the pieces from the drag stack. It will soon go out of scope and be disposed.
+            }
+            
+            return true;
         }
         
     }

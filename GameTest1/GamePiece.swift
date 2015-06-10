@@ -22,14 +22,15 @@ public class GamePiece : SKSpriteNode
     public convenience init(pieceValue: Int) {
         var size = CGSizeMake(CGFloat(SpriteUtils.GetGamePieceWidth(pieceValue)), CGFloat(AppConstants.UILayout.GamePieceHeight))
                 
-        self.init(texture:nil, color: UIColor.grayColor(), size: size)
+        self.init(texture:nil, color: UIColor.purpleColor(), size: size)
         
         self.PieceValue = pieceValue
         self.anchorPoint = CGPointMake(0.5,0);
         
         var label = SKLabelNode(text: String(pieceValue))
         label.fontSize = 18
-        label.fontColor = UIColor.blackColor()
+        label.fontName = "Copperplate"
+        label.fontColor = UIColor.whiteColor()
         self.addChild(label);
     }
     

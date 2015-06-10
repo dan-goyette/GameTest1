@@ -34,7 +34,7 @@ class GridSquareTests: XCTestCase {
         var gamePiece_v5_1 = GamePiece(pieceValue: 5)
         var gamePiece_v5_2 = GamePiece(pieceValue: 5)
         
-        var gridSquare = GridSquare(rowIndex: 0, columnIndex: 0)
+        var gridSquare = GridSquare(rowIndex: 0, columnIndex: 0, isInventorySquare: false)
         
         
         // Add a "5". Then try to add another "5".
@@ -76,6 +76,31 @@ class GridSquareTests: XCTestCase {
         XCTAssertTrue(gridSquare.tryAddGamePiece(gamePiece_v3_1))
 
 
+    }
+    
+    func testGetDragStack() {
+        var gamePiece_v1_1 = GamePiece(pieceValue: 1)
+        var gamePiece_v1_2 = GamePiece(pieceValue: 1)
+        var gamePiece_v2_1 = GamePiece(pieceValue: 2)
+        var gamePiece_v2_2 = GamePiece(pieceValue: 2)
+        var gamePiece_v3_1 = GamePiece(pieceValue: 3)
+        var gamePiece_v3_2 = GamePiece(pieceValue: 3)
+        var gamePiece_v4_1 = GamePiece(pieceValue: 4)
+        var gamePiece_v4_2 = GamePiece(pieceValue: 4)
+        var gamePiece_v5_1 = GamePiece(pieceValue: 5)
+        var gamePiece_v5_2 = GamePiece(pieceValue: 5)
+        
+        var gridSquare = GridSquare(rowIndex: 0, columnIndex: 0, isInventorySquare: false)
+        
+        gridSquare.tryAddGamePiece(gamePiece_v5_1)
+        gridSquare.tryAddGamePiece(gamePiece_v2_1)
+        gridSquare.tryAddGamePiece(gamePiece_v1_1)
+        
+        var dragStack = gridSquare.getDragStack()
+        
+        XCTAssertEqual(1, gridSquare.getGamePieces().count)
+        XCTAssertEqual(2, dragStack!.getGamePieces().count)
+        
     }
     
     

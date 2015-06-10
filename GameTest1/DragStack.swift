@@ -23,7 +23,11 @@ public class DragStack : SKSpriteNode
         
         self.init(texture:nil, color: UIColor.clearColor(), size: size)
         
-        self.GamePieces = [GamePiece]()
+        self.GamePieces = gamePieces
+        for gamePiece in self.GamePieces {
+            self.addChild(gamePiece)
+        }
+        self.anchorPoint = CGPointMake(0.0, 0.0)
         self.refreshGamePiecePositions();
     }
     
@@ -36,8 +40,9 @@ public class DragStack : SKSpriteNode
     }
     
     private func refreshGamePiecePositions() {
-        //GamePieces.position = CGPointMake(self.position.x, self.position.y + CGFloat(15 * gamePieces.count))
-        // TODO
+        for tuple in SpriteUtils.GetGamePiecePositions(self.GamePieces) {
+            tuple.gamePiece.position = tuple.position
+        }
     }
 }
 
