@@ -98,7 +98,7 @@ class GridSquareTests: XCTestCase {
         
         var dragStack = gridSquare.getDragStack()
         
-        XCTAssertEqual(1, gridSquare.getGamePieces().count)
+        XCTAssertEqual(3, gridSquare.getGamePieces().count)
         XCTAssertEqual(2, dragStack!.getGamePieces().count)
         
     }

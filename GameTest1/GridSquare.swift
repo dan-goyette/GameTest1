@@ -124,26 +124,33 @@
             
             // Get the consecutive items starting from the top of the stack.
             var topOfStack = [GamePiece]()
-            var firstPiece = self.GamePieces[self.GamePieces.count - 1];
-            topOfStack.append(firstPiece);
+            var firstPiece = self.GamePieces[self.GamePieces.count - 1]
+            firstPiece.alpha = 0.5
+            firstPiece.userData = NSMutableDictionary()
+            firstPiece.userData?.setValue("x", forKey: "x")
+            var newFirstPiece = GamePiece(pieceValue: firstPiece.PieceValue);
+            topOfStack.append(newFirstPiece);
             var lastPieceValue = firstPiece.PieceValue;
             
             for (var index = self.GamePieces.count - 2; index >= 0; index--) {
                 var gamePiece = self.GamePieces[index]
                 if (gamePiece.PieceValue - 1 == lastPieceValue) {
                     // This is a consecutive piece. Add it.
-                    topOfStack.insert(gamePiece, atIndex: 0);
+                    var copyOfPiece = GamePiece(pieceValue: gamePiece.PieceValue)
+                    topOfStack.insert(copyOfPiece, atIndex: 0);
                     lastPieceValue = gamePiece.PieceValue;
+                    
+                    // Make the current piece semi-transparent. 
+                    gamePiece.alpha = 0.5
+                    gamePiece.userData = NSMutableDictionary()
+                    gamePiece.userData?.setValue("x", forKey: "x")
+                    
                 } else {
                     // Not consecutive. Break out of the loop.
                     break;
                 }
             }
             
-            // Remove all of the dragged items from the GridSquare.
-            for gamePiece in topOfStack.reverse() {
-                assert(self.tryRemoveGamePiece(gamePiece))
-            }
             
             var dragStack = DragStack(gamePieces: topOfStack);
             
@@ -155,7 +162,15 @@
             // if drag stack's max pieceValue is greater than this square's min piece value,
             // allow the stack.
             var dragStackMaxPieceValue = sorted(dragStack.getGamePieces(), {p1, p2 in return p1.PieceValue > p2.PieceValue}).first?.PieceValue
-            var gridSquareMinPieceValue = sorted(self.getGamePieces(), {p1, p2 in return p1.PieceValue < p2.PieceValue}).first?.PieceValue ?? Int.max
+//            
+//            var ownGamePieces = self.GamePieces.filter({ $0.userData = nil || $0.userData!.objectForKey("x") == nil })
+//            var gridSquareMinPieceValue = sorted(ownGamePieces, {p1, p2 in return p1.PieceValue < p2.PieceValue}).first?.PieceValue ?? Int.max
+            
+            var ownGamePieces = self.getGamePieces().filter({$0.userData == nil
+                || $0.userData!.objectForKey("x") == nil })
+
+            var gridSquareMinPieceValue = sorted(ownGamePieces, {p1, p2 in return p1.PieceValue < p2.PieceValue}).first?.PieceValue ?? Int.max
+
             
             return dragStackMaxPieceValue < gridSquareMinPieceValue
         }

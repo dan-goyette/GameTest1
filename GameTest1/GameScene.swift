@@ -299,12 +299,30 @@ class GameScene: SKScene {
             
             // If we a dropping on a valid square, complete the operation. Else, return the stack to where it started.
             if (targetGridSquare != nil) {
+                
+                for gamePiece in lastSelectedGridSquare!.getGamePieces().reverse() {
+                    if (gamePiece.userData != nil && gamePiece.userData?.objectForKey("x") != nil) {
+                        lastSelectedGridSquare!.tryRemoveGamePiece(gamePiece)
+                    }
+                    
+                }
+                
+                
                 targetGridSquare!.tryAddDragStack(lastSelectedDragStack!)
+ 
+                
                 
                 
                 if (targetGridSquare!.getGamePieces().count  == 5) {
                     // We've made a stack of 5. Score a point.
-                    targetGridSquare!.getDragStack()
+                    
+                    for gamePiece in targetGridSquare!.getGamePieces().reverse() {
+                        
+                            targetGridSquare!.tryRemoveGamePiece(gamePiece)
+                        
+                    }
+                    
+                    
                     
                     self.addToScore(1)
                     var startDragNoise = SKAction.playSoundFileNamed("Menu1A.wav", waitForCompletion: false)
@@ -315,12 +333,25 @@ class GameScene: SKScene {
 //                    self.runAction(startDragNoise)
 
                 }
-            } else if (lastSelectedGridSquare != nil) 		{
-                lastSelectedGridSquare!.tryAddDragStack(lastSelectedDragStack!)
+                
+                
+            } else if (lastSelectedGridSquare != nil) {
+                
+                for gamePiece in lastSelectedGridSquare!.getGamePieces() {
+                    gamePiece.alpha = 1.0
+                }
+                
+                for gamePiece in lastSelectedDragStack!.getGamePieces() {
+                    gamePiece.removeFromParent()
+                }
+                lastSelectedDragStack?.removeFromParent()
             }
             
             break
         }
+        
+        lastSelectedDragStack?.removeFromParent()
+
         
         lastSelectedGridSquare = nil;
         lastSelectedDragStack = nil;
