@@ -29,6 +29,94 @@ class GameScene: SKScene {
         createTileGrid()
         createInventoryGrid()
         addScoreLabel()
+        initiateDestruction()
+    }
+    
+    func initiateDestruction() {
+        
+        
+        var wait = SKAction.waitForDuration(6.0)
+        var startCountdown = SKAction.runBlock({
+            
+            // Set up a sequence where a given row or column glows for 5 seconds, and then at the
+            // end of those five seconds everything in that row/column is destroyed. 
+            
+            // Determine whether row or column
+            var isColumn = Int(arc4random_uniform(2)) == 1
+            
+            var targetGridSquares = [GridSquare]()
+            
+            if (isColumn) {
+                var columnIndex = Int(arc4random_uniform(UInt32(self.columnCount)))
+                for rowIndex in 0 ..< self.rowCount {
+                    targetGridSquares.append(self.getGridSquareAtRowAndColumnIndex(rowIndex, columnIndex: columnIndex)!)
+                }
+            } else {
+                var rowIndex = Int(arc4random_uniform(UInt32(self.rowCount)))
+                for columnIndex in 0 ..< self.columnCount {
+                    targetGridSquares.append(self.getGridSquareAtRowAndColumnIndex(rowIndex, columnIndex: columnIndex)!)
+                }
+            }
+
+
+            for gridSquare in targetGridSquares {
+
+                var initialColor = gridSquare.color
+                // Now we know which grid squares. Create a "glow" action and apply it to all
+              
+                var glowOn1 = SKAction.colorizeWithColor(UIColor.redColor(), colorBlendFactor: 1, duration: 0.7)
+                var glowOn2 = SKAction.colorizeWithColor(UIColor.redColor(), colorBlendFactor: 1, duration: 0.7)
+                var glowOn3 = SKAction.colorizeWithColor(UIColor.redColor(), colorBlendFactor: 1, duration: 1.0)
+                var glowOff = SKAction.colorizeWithColor(initialColor, colorBlendFactor: 1.0, duration: 0.3)
+                var glowAndUndo = SKAction.sequence([glowOn1, glowOff, glowOn2, glowOff, glowOn3, glowOff])
+                gridSquare.runAction(glowAndUndo)
+            }
+            
+            var explodeAction = SKAction.runBlock({
+
+                var explodeNoise = SKAction.playSoundFileNamed("8bit_bomb_explosion.wav", waitForCompletion: false)
+                self.runAction(explodeNoise)
+                
+                // Delete all contents of effected grid squares
+                
+                for gridSquare in targetGridSquares {
+                    for gamePiece in gridSquare.getGamePieces().reverse() {
+                        gridSquare.tryRemoveGamePiece(gamePiece)
+                    }
+                }
+            })
+            
+            var wait3 = SKAction.waitForDuration(3.0)
+
+            var glowThenExplode = SKAction.sequence([wait3, explodeAction])
+            self.runAction(glowThenExplode)
+            
+
+            
+            
+//
+//            
+//            
+//            var newInventorySquare = GridSquare(rowIndex: 0, columnIndex: 0, isInventorySquare: true)
+//            self.InventorySquares.append(newInventorySquare)
+//            var pieceValue = Int(arc4random_uniform(5) + 1)
+//            newInventorySquare.tryAddGamePiece( GamePiece(pieceValue: pieceValue))
+//            newInventorySquare.position.x += 500
+//            newInventorySquare.color = UIColor.orangeColor()
+//            
+//            var moveLeft = SKAction.moveByX(-500, y: 0, duration: 9.0)
+//            var removeFromGame = SKAction.runBlock({
+//                self.removeInventorySquare(newInventorySquare);
+//            })
+//            
+//            self.inventoryBoundsSquare.addChild(newInventorySquare)
+//            
+//            var seq = SKAction.sequence([moveLeft, removeFromGame])
+//            newInventorySquare.runAction(seq)
+        });
+        
+        var sequence = SKAction.sequence([ startCountdown, wait])
+        self.runAction(SKAction.repeatActionForever(sequence))
     }
     
     func addScoreLabel() {
@@ -135,7 +223,7 @@ class GameScene: SKScene {
         self.addChild(inventoryBoundsSquare)
         
         
-        var wait = SKAction.waitForDuration(2.5)
+        var wait = SKAction.waitForDuration(1.0)
         var run = SKAction.runBlock({
             var newInventorySquare = GridSquare(rowIndex: 0, columnIndex: 0, isInventorySquare: true)
             self.InventorySquares.append(newInventorySquare)
@@ -144,10 +232,9 @@ class GameScene: SKScene {
             newInventorySquare.position.x += 500
             newInventorySquare.color = UIColor.orangeColor()
             
-            var moveLeft = SKAction.moveByX(-500, y: 0, duration: 9.0)
+            var moveLeft = SKAction.moveByX(-500, y: 0, duration: 4.5)
             var removeFromGame = SKAction.runBlock({
-                newInventorySquare.removeFromParent()
-                self.InventorySquares.removeAtIndex(find(self.InventorySquares, newInventorySquare)!)
+                self.removeInventorySquare(newInventorySquare);
             })
             
             self.inventoryBoundsSquare.addChild(newInventorySquare)
@@ -160,6 +247,12 @@ class GameScene: SKScene {
         self.runAction(SKAction.repeatActionForever(sequence))
     }
     
+    func removeInventorySquare(inventorySquare: GridSquare) {
+        inventorySquare.removeFromParent()
+        if (find(self.InventorySquares, inventorySquare) != nil) {
+            self.InventorySquares.removeAtIndex(find(self.InventorySquares, inventorySquare)!)
+        }
+    }
 
     
     
@@ -275,7 +368,7 @@ class GameScene: SKScene {
                         dragStack.position = CGPointMake(newX, newY)
                         self.addChild(dragStack);
                         
-                        var startDragNoise = SKAction.playSoundFileNamed("Item1A.wav", waitForCompletion: false)
+                        var startDragNoise = SKAction.playSoundFileNamed("Menu1B.wav", waitForCompletion: false)
                         self.runAction(startDragNoise)
                         
                         
@@ -336,6 +429,9 @@ class GameScene: SKScene {
                 
                 targetGridSquare!.tryAddDragStack(lastSelectedDragStack!)
  
+                if (lastSelectedGridSquare?.IsInventorySquare == true) {
+                    self.removeInventorySquare(self.lastSelectedGridSquare!);
+                }
                 
                 
                 
@@ -382,32 +478,7 @@ class GameScene: SKScene {
         lastSelectedGridSquare = nil;
         lastSelectedDragStack = nil;
 
-
-        // Clean up inventory.
-        
-        for columnIndex in 0..<columnCount {
-            var inventorySquare = self.InventorySquares[columnIndex]
-            if (inventorySquare.getGamePieces().count == 0) {
-                // Look ahead for the next square with pieces.
-                for altColumnIndex in (columnIndex + 1)..<columnCount {
-                    var altInventorySquare = self.InventorySquares[altColumnIndex]
-                    if (altInventorySquare.getGamePieces().count > 0) {
-                        inventorySquare.tryAddDragStack(altInventorySquare.getDragStack()!)
-                        break
-                    }
-                }
-            }
-        }
-        
-        // Add another piece, if possible.
-//        for columnIndex in 0..<columnCount {
-//            var inventorySquare = self.InventorySquares[columnIndex]
-//            if (inventorySquare.getGamePieces().count == 0) {
-//                var pieceValue = Int(arc4random_uniform(5) + 1)
-//                inventorySquare.tryAddGamePiece( GamePiece(pieceValue: pieceValue))
-//                break
-//            }
-//        }
+			
     }
   
     func addToScore(points: Int) {

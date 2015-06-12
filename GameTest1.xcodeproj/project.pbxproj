@@ -25,6 +25,7 @@
 		37B71A941B1D59AE00B356F9 /* AppConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37B71A931B1D59AE00B356F9 /* AppConstants.swift */; };
 		37B71A961B1D5E6D00B356F9 /* GridSquare.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37B71A951B1D5E6D00B356F9 /* GridSquare.swift */; };
 		37B71A981B1D68E100B356F9 /* SpriteUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37B71A971B1D68E100B356F9 /* SpriteUtils.swift */; };
+		37D8647A1B2A415400E61883 /* 8bit_bomb_explosion.wav in Resources */ = {isa = PBXBuildFile; fileRef = 37D864791B2A415400E61883 /* 8bit_bomb_explosion.wav */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -60,6 +61,7 @@
 		37B71A931B1D59AE00B356F9 /* AppConstants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppConstants.swift; sourceTree = "<group>"; };
 		37B71A951B1D5E6D00B356F9 /* GridSquare.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GridSquare.swift; sourceTree = "<group>"; };
 		37B71A971B1D68E100B356F9 /* SpriteUtils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpriteUtils.swift; sourceTree = "<group>"; };
+		37D864791B2A415400E61883 /* 8bit_bomb_explosion.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = 8bit_bomb_explosion.wav; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -169,6 +171,7 @@
 		378F5A4C1B27D2C300BA182C /* Effects */ = {
 			isa = PBXGroup;
 			children = (
+				37D864791B2A415400E61883 /* 8bit_bomb_explosion.wav */,
 				378F5A4D1B27D2DE00BA182C /* Item1A.wav */,
 				378F5A4E1B27D2DE00BA182C /* Item1B.wav */,
 				378F5A4F1B27D2DE00BA182C /* Menu1A.wav */,
@@ -286,6 +289,7 @@
 				378F5A531B27D2DE00BA182C /* Menu1A.wav in Resources */,
 				378F5A511B27D2DE00BA182C /* Item1A.wav in Resources */,
 				378F5A521B27D2DE00BA182C /* Item1B.wav in Resources */,
+				37D8647A1B2A415400E61883 /* 8bit_bomb_explosion.wav in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
